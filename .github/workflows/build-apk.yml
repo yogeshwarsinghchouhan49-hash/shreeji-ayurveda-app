@@ -1,4 +1,3 @@
-
 name: Build Shreeji Ayurveda APK
 
 on:
@@ -21,11 +20,16 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Locate Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          test -d "$ANDROID_HOME"
 
-      - name: Install Android SDK
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -38,6 +42,7 @@ jobs:
           test -n "$ZIP"
           mkdir extracted
           unzip -q "$ZIP" -d extracted
+          ls extracted/ShreejiAyurveda
 
       - name: Build APK
         run: gradle -p extracted/ShreejiAyurveda assembleDebug
